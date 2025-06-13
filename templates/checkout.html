@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="ja">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Item</title>
+    <link href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='onlineshop.css') }}" rel="stylesheet">
+</head>
+<body>
+
+<div class="navbar navbar-inverse" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="{{ url_for('index') }}">onlineshop</a>
+    </div>
+    <div class="navbar-collapse collapse"> 
+      <ul class="nav navbar-nav">
+        {% if not "username" in session %}
+        <li><a href="{{ url_for('login') }}">Login</a></li>
+        {% else %}
+        <li><a href="{{ url_for('additem') }}">Add Item</a></li>
+        <li><a href="{{ url_for('searchitem') }}">Search Item</a></li>
+        <li><a href="{{ url_for('addtocart') }}">Cart</a></li>
+        <li><a href="{{ url_for('logout') }}">Logout</a></li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="page-header"><h1>Cart</h1></div>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }}"> {{ message|capitalize }} </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  {% if form %}
+    {% for field in form.errors %}
+      {% for error in form.errors[field] %}
+        <div class="alert alert-danger">{{ error }}</div>
+      {% endfor %}
+    {% endfor %}
+  {% endif %}
+
+  <div>Hi, {{ session["username"] }}. Your order has been accepted. Thank you!</div>
+
+  {% if item_list %}
+  <table class="table">
+    <thead>
+      <tr>
+        <th scope="col">ORDER ID</th>
+        <th scope="col">Owner ID</th>
+        <th scope="col">Owner Name</th>
+        <th scope="col">Item Name</th>
+        <th scope="col">Amount</th>
+        <th scope="col">Price</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% set ns = namespace(total=0) %}
+    {% for order in item_list %}
+      <tr>
+        <th scope="row">{{ order.id }}</th>
+        <td>{{ order.owner_id }}</td>
+        <td>{{ order.ownername }}</td>
+        <td>{{ order.itemname }}</td>
+        <td>{{ order.amount }}</td>
+        <td>{{ order.price }}</td>
+      </tr>
+      {% set ns.total = ns.total + order.amount * order.price %}
+    {% endfor %}
+    </tbody>
+  </table>
+  <div id="total">Total: {{ ns.total }} yen</div>
+  {% endif %}
+
+</div>
+
+<script src="{{ url_for('static', filename='onlineshop.js') }}"></script>
+
+</body>
+</html>
